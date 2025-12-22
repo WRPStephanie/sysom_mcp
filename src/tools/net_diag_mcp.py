@@ -12,6 +12,8 @@ from lib import (
     DiagnosisMCPResponse,
     DiagnosisMCPRequestParams,
     DiagnoseResultCode,
+    is_permission_error,
+    enhance_permission_error_message,
 )
 from lib.service_config import SERVICE_CONFIG
 
@@ -35,6 +37,11 @@ async def packetdrop(
     ctx: Context | None = None,
 ) -> DiagnosisMCPResponse:
     """
+    重要提示：
+        在调用此工具之前，必须先调用 check_sysom_initialed 工具检查用户是否已开通sysom服务。
+        如果用户未开通sysom服务，必须先调用 initial_sysom 工具开通服务，或引导用户前往 https://alinux.console.aliyun.com 进行开通。
+        只有在确认用户已开通sysom服务后，才能调用此工具。
+    
     packetdrop（网络丢包诊断）工具主要分析数据包通过网络传输过程中，由于多种原因在操作系统内核层面发生的丢失问题。
     使用场景：
         1. 由于系统配置错误导致的丢包，提示用户及时调整相关配置参数。
@@ -73,12 +80,22 @@ async def packetdrop(
             region=region,
             params=params
         )
-        return await helper.execute(mcp_request)
+        response = await helper.execute(mcp_request)
+        
+        # 检查是否是权限错误，如果是则增强错误消息
+        if response.code != DiagnoseResultCode.SUCCESS and is_permission_error(response.message or ""):
+            response.message = enhance_permission_error_message(response.message or "")
+        
+        return response
     except Exception as e:
         logger.error(f"packetdrop诊断失败: {e}")
+        error_message = f"诊断失败：{str(e)}"
+        # 检查异常消息中是否包含权限错误
+        if is_permission_error(error_message):
+            error_message = enhance_permission_error_message(error_message)
         return DiagnosisMCPResponse(
             code=DiagnoseResultCode.TASK_CREATE_FAILED,
-            message=f"诊断失败：{str(e)}",
+            message=error_message,
             task_id=""
         )
 
@@ -103,7 +120,12 @@ async def netjitter(
     threshold: Optional[str] = Field(None, description="抖动阈值(ms)"),
     ctx: Context | None = None,
 ) -> DiagnosisMCPResponse:
-    """netjitter（网络抖动诊断）工具主要分析数据包在网络传输过程中，由于多种因素引起的操作系统内核层面的不稳定现象。
+    """重要提示：
+        在调用此工具之前，必须先调用 check_sysom_initialed 工具检查用户是否已开通sysom服务。
+        如果用户未开通sysom服务，必须先调用 initial_sysom 工具开通服务，或引导用户前往 https://alinux.console.aliyun.com 进行开通。
+        只有在确认用户已开通sysom服务后，才能调用此工具。
+    
+    netjitter（网络抖动诊断）工具主要分析数据包在网络传输过程中，由于多种因素引起的操作系统内核层面的不稳定现象。
     使用场景：
         1. 检测网络抖动是否由应用程序自身接收数据包速度缓慢所引起的。
         2. 检测网络抖动是否由内核软中断处理数据包速度缓慢所引起的。
@@ -154,12 +176,22 @@ async def netjitter(
             region=region,
             params=params
         )
-        return await helper.execute(mcp_request)
+        response = await helper.execute(mcp_request)
+        
+        # 检查是否是权限错误，如果是则增强错误消息
+        if response.code != DiagnoseResultCode.SUCCESS and is_permission_error(response.message or ""):
+            response.message = enhance_permission_error_message(response.message or "")
+        
+        return response
     except Exception as e:
         logger.error(f"netjitter诊断失败: {e}")
+        error_message = f"诊断失败：{str(e)}"
+        # 检查异常消息中是否包含权限错误
+        if is_permission_error(error_message):
+            error_message = enhance_permission_error_message(error_message)
         return DiagnosisMCPResponse(
             code=DiagnoseResultCode.TASK_CREATE_FAILED,
-            message=f"诊断失败：{str(e)}",
+            message=error_message,
             task_id=""
         )
 

@@ -13,6 +13,8 @@ from lib import (
     DiagnosisMCPResponse,
     DiagnosisMCPRequestParams,
     DiagnoseResultCode,
+    is_permission_error,
+    enhance_permission_error_message,
 )
 from lib.service_config import SERVICE_CONFIG
 
@@ -46,6 +48,11 @@ async def memgraph(
     ctx: Context | None = None,
 ) -> DiagnosisMCPResponse:
     """
+    重要提示：
+        在调用此工具之前，必须先调用 check_sysom_initialed 工具检查用户是否已开通sysom服务。
+        如果用户未开通sysom服务，必须先调用 initial_sysom 工具开通服务，或引导用户前往 https://alinux.console.aliyun.com 进行开通。
+        只有在确认用户已开通sysom服务后，才能调用此工具。
+    
     memgraph（内存全景分析）工具：内存全景分析适用于内存占用较高但无法明确识别具体内存占用情况的场景。通过使用内存全景分析诊断功能，可以扫描当前系统的内存占用状态，详细拆解内存使用情况。系统内存与应用内存的分布，并列出当前Top 30的应用内存使用、文件缓存、共享内存缓存占用情况的排序。
     必需参数：
         - uid: 用户ID
@@ -116,12 +123,22 @@ async def memgraph(
         )
         
         # 执行诊断
-        return await helper.execute(mcp_request)
+        response = await helper.execute(mcp_request)
+        
+        # 检查是否是权限错误，如果是则增强错误消息
+        if response.code != DiagnoseResultCode.SUCCESS and is_permission_error(response.message or ""):
+            response.message = enhance_permission_error_message(response.message or "")
+        
+        return response
     except Exception as e:
         logger.error(f"memgraph诊断失败: {e}")
+        error_message = f"诊断失败：{str(e)}"
+        # 检查异常消息中是否包含权限错误
+        if is_permission_error(error_message):
+            error_message = enhance_permission_error_message(error_message)
         return DiagnosisMCPResponse(
             code=DiagnoseResultCode.TASK_CREATE_FAILED,
-            message=f"诊断失败：{str(e)}",
+            message=error_message,
             task_id=""
         )
 
@@ -158,6 +175,11 @@ async def javamem(
     ctx: Context | None = None,
 ) -> DiagnosisMCPResponse:
     """
+    重要提示：
+        在调用此工具之前，必须先调用 check_sysom_initialed 工具检查用户是否已开通sysom服务。
+        如果用户未开通sysom服务，必须先调用 initial_sysom 工具开通服务，或引导用户前往 https://alinux.console.aliyun.com 进行开通。
+        只有在确认用户已开通sysom服务后，才能调用此工具。
+    
     javamem（Java内存诊断）工具，主要用于诊断Java应用的内存使用情况，帮助用户了解Java堆内存和非堆内存的分布和组成，识别潜在的内存泄漏和内存溢出问题，实现Java内存的可维可测可追踪。
     使用场景：Java应用内存占用较高，无法明确识别具体内存占用情况。
     必需参数：
@@ -231,12 +253,22 @@ async def javamem(
         )
         
         # 执行诊断
-        return await helper.execute(mcp_request)
+        response = await helper.execute(mcp_request)
+        
+        # 检查是否是权限错误，如果是则增强错误消息
+        if response.code != DiagnoseResultCode.SUCCESS and is_permission_error(response.message or ""):
+            response.message = enhance_permission_error_message(response.message or "")
+        
+        return response
     except Exception as e:
         logger.error(f"javamem诊断失败: {e}")
+        error_message = f"诊断失败：{str(e)}"
+        # 检查异常消息中是否包含权限错误
+        if is_permission_error(error_message):
+            error_message = enhance_permission_error_message(error_message)
         return DiagnosisMCPResponse(
             code=DiagnoseResultCode.TASK_CREATE_FAILED,
-            message=f"诊断失败：{str(e)}",
+            message=error_message,
             task_id=""
         )
 
@@ -268,6 +300,11 @@ async def oomcheck(
     ctx: Context | None = None,
 ) -> DiagnosisMCPResponse:
     """
+    重要提示：
+        在调用此工具之前，必须先调用 check_sysom_initialed 工具检查用户是否已开通sysom服务。
+        如果用户未开通sysom服务，必须先调用 initial_sysom 工具开通服务，或引导用户前往 https://alinux.console.aliyun.com 进行开通。
+        只有在确认用户已开通sysom服务后，才能调用此工具。
+    
     oomcheck（OOM诊断）工具，主要用于分析和界定OOM（Out of memory）问题，找出导致OOM的主要原因，并给出相应的处理建议，帮助用户解决OOM问题，提高系统的可用性和性能。
     使用场景：发生OOM问题，需要诊断OOM原因，常见的OOM场景包括：
         - 系统全局内存不足：整个主机的内存使用过量，导致系统内存不足，从而触发了OOM。
@@ -344,12 +381,22 @@ async def oomcheck(
         )
         
         # 执行诊断
-        return await helper.execute(mcp_request)
+        response = await helper.execute(mcp_request)
+        
+        # 检查是否是权限错误，如果是则增强错误消息
+        if response.code != DiagnoseResultCode.SUCCESS and is_permission_error(response.message or ""):
+            response.message = enhance_permission_error_message(response.message or "")
+        
+        return response
     except Exception as e:
         logger.error(f"oomcheck诊断失败: {e}")
+        error_message = f"诊断失败：{str(e)}"
+        # 检查异常消息中是否包含权限错误
+        if is_permission_error(error_message):
+            error_message = enhance_permission_error_message(error_message)
         return DiagnosisMCPResponse(
             code=DiagnoseResultCode.TASK_CREATE_FAILED,
-            message=f"诊断失败：{str(e)}",
+            message=error_message,
             task_id=""
         )
 

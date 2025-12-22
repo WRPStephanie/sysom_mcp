@@ -44,10 +44,12 @@ try:
     from tools.sched_diag_mcp import mcp as sched_mcp
     from tools.other_diag_mcp import mcp as other_mcp
     from tools.crash_agent_mcp import mcp as crash_agent_mcp
+    from tools.initial_sysom_mcp import mcp as initial_sysom_mcp
+    
     
     # 从各个服务的 MCP 实例中获取工具并添加到统一服务器
     # FastMCP 使用 _tool_manager._tools 字典存储工具
-    service_mcps = [am_mcp, mem_mcp, io_mcp, net_mcp, sched_mcp, other_mcp, crash_agent_mcp]
+    service_mcps = [am_mcp, mem_mcp, io_mcp, net_mcp, sched_mcp, other_mcp, crash_agent_mcp, initial_sysom_mcp]
     
     total_tools = 0
     for service_mcp in service_mcps:
@@ -84,15 +86,20 @@ except Exception as e:
 @click.command()
 @click.option("--stdio", "run_mode", flag_value="stdio", default=True, help="Run in stdio mode")
 @click.option("--sse", "run_mode", flag_value="sse", help="Run in SSE mode")
-@click.option("--host", default="127.0.0.1", help="Host to bind to (for SSE mode, default: 127.0.0.1)")
-@click.option("--port", default=7140, type=int, help="Port to bind to (for SSE mode, default: 7140)")
-@click.option("--path", default="/mcp/unified", help="Path for SSE endpoint (default: /mcp/unified)")
-def main(run_mode: Literal["stdio", "sse"], host: str, port: int, path: str) -> None:
-    """Run unified MCP server in stdio or SSE mode"""
+@click.option("--streamable-http", "run_mode", flag_value="streamable-http", help="Run in streamable-http mode")
+@click.option("--host", default="127.0.0.1", help="Host to bind to (for SSE/streamable-http mode, default: 127.0.0.1)")
+@click.option("--port", default=7140, type=int, help="Port to bind to (for SSE/streamable-http mode, default: 7140)")
+@click.option("--path", default="/mcp/unified", help="Path for SSE/streamable-http endpoint (default: /mcp/unified)")
+def main(run_mode: Literal["stdio", "sse", "streamable-http"], host: str, port: int, path: str) -> None:
+    """Run unified MCP server in stdio, SSE, or streamable-http mode"""
     if run_mode == "sse":
         # SSE 模式：HTTP/SSE 服务器
         print(f"Starting MCP server in SSE mode on {host}:{port}{path}", file=sys.stderr)
         mcp.run(transport="sse", host=host, port=port, path=path)
+    elif run_mode == "streamable-http":
+        # streamable-http 模式：支持 POST 请求的 HTTP 服务器
+        print(f"Starting MCP server in streamable-http mode on {host}:{port}{path}", file=sys.stderr)
+        mcp.run(transport="streamable-http", host=host, port=port, path=path)
     else:
         # stdio 模式：这是 Qwen Code 使用的模式
         # 注意：不要输出任何内容到 stdout，这会干扰 MCP 协议

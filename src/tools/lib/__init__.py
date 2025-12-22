@@ -12,7 +12,11 @@ from .diagnosis_helper import (
     DiagnosisMCPResponse,
     DiagnoseResultCode
 )
-
+from .permission_helper import (
+    is_permission_error,
+    enhance_permission_error_message,
+)
+from .initial_helper import InitialSysomMCPHelper, InitialResultCode
 __all__ = [
     "OpenAPIClient",
     "AlibabaCloudSDKClient",
@@ -27,4 +31,8 @@ __all__ = [
     "DiagnoseResultCode",
     "AMMCPHelper",
     "AMResultCode",
+    "InitialSysomMCPHelper",
+    "InitialResultCode",
+    "is_permission_error",
+    "enhance_permission_error_message",
 ]

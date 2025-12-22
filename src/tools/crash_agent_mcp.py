@@ -91,6 +91,11 @@ async def create_vmcore_diagnosis_task(
     ),
 ) -> CreateTaskMCPResponse:
     """
+    重要提示：
+        在调用此工具之前，必须先调用 check_sysom_initialed 工具检查用户是否已开通sysom服务。
+        如果用户未开通sysom服务，必须先调用 initial_sysom 工具开通服务，或引导用户前往 https://alinux.console.aliyun.com 进行开通。
+        只有在确认用户已开通sysom服务后，才能调用此工具。
+    
     创建基于VMCORE文件的内核宕机诊断任务。此工具会分析内核崩溃时生成的VMCORE文件，结合debug符号信息，定位系统崩溃的根本原因，并搜索相关社区修复补丁。请注意此工具仅在分析Alinux和CentOS内核的vmcore文件时不需要提供debuginfo文件，对于其他发行版内核，需要提供debuginfo文件， 请确保提供的debuginfo文件正确。
     VMCORE诊断正常会持续5-30分钟，请耐心等待后查询结果。
 
@@ -147,6 +152,11 @@ async def create_dmesg_diagnosis_task(
     dmesg_url: str = Field(..., description="dmesg日志文件下载链接"),
 ) -> CreateTaskMCPResponse:
     """
+    重要提示：
+        在调用此工具之前，必须先调用 check_sysom_initialed 工具检查用户是否已开通sysom服务。
+        如果用户未开通sysom服务，必须先调用 initial_sysom 工具开通服务，或引导用户前往 https://alinux.console.aliyun.com 进行开通。
+        只有在确认用户已开通sysom服务后，才能调用此工具。
+    
     创建基于dmesg日志的系统诊断任务。此工具分析系统宕机保留的dmesg日志并分析宕机原因。
 
     功能描述：
@@ -193,6 +203,11 @@ async def query_diagnosis_task(
     task_id: str = Field(..., description="诊断任务ID"),
 ) -> GetTaskMCPResponse:
     """
+    重要提示：
+        在调用此工具之前，必须先调用 check_sysom_initialed 工具检查用户是否已开通sysom服务。
+        如果用户未开通sysom服务，必须先调用 initial_sysom 工具开通服务，或引导用户前往 https://alinux.console.aliyun.com 进行开通。
+        只有在确认用户已开通sysom服务后，才能调用此工具。
+    
     查询诊断任务的结果。根据任务ID获取诊断任务的执行状态和结果。由于诊断任务可能耗时较长，因此该接口返回的是任务在运行中时后请稍后再查询。
 
     功能描述：
@@ -295,6 +310,11 @@ async def list_history_tasks(
     ),
 ) -> ListHistoryTasksMCPResponse:
     """
+    重要提示：
+        在调用此工具之前，必须先调用 check_sysom_initialed 工具检查用户是否已开通sysom服务。
+        如果用户未开通sysom服务，必须先调用 initial_sysom 工具开通服务，或引导用户前往 https://alinux.console.aliyun.com 进行开通。
+        只有在确认用户已开通sysom服务后，才能调用此工具。
+    
     查询历史创建的宕机诊断任务记录，返回指定天数内的任务列表，包括vmcore文件诊断和dmesg日志诊断两类。
 
     功能描述：

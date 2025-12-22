@@ -12,6 +12,8 @@ from lib import (
     DiagnosisMCPResponse,
     DiagnosisMCPRequestParams,
     DiagnoseResultCode,
+    is_permission_error,
+    enhance_permission_error_message,
 )
 from lib.service_config import SERVICE_CONFIG
 
@@ -39,6 +41,11 @@ async def iofsstat(
     ctx: Context | None = None,
 ) -> DiagnosisMCPResponse:
     """
+    重要提示：
+        在调用此工具之前，必须先调用 check_sysom_initialed 工具检查用户是否已开通sysom服务。
+        如果用户未开通sysom服务，必须先调用 initial_sysom 工具开通服务，或引导用户前往 https://alinux.console.aliyun.com 进行开通。
+        只有在确认用户已开通sysom服务后，才能调用此工具。
+    
     iofsstat（IO流量分析）工具主要分析系统中IO流量的归属，结果包含每个磁盘/分区的IO流量统计列表以及每个进程的IO流量统计列表。
     使用场景：实例中存在IO Burst问题，需要分析IO流量的归属。
     仅支持节点诊断模式，channel必须为ecs。
@@ -84,12 +91,22 @@ async def iofsstat(
             region=region,
             params=params
         )
-        return await helper.execute(mcp_request)
+        response = await helper.execute(mcp_request)
+        
+        # 检查是否是权限错误，如果是则增强错误消息
+        if response.code != DiagnoseResultCode.SUCCESS and is_permission_error(response.message or ""):
+            response.message = enhance_permission_error_message(response.message or "")
+        
+        return response
     except Exception as e:
         logger.error(f"iofsstat诊断失败: {e}")
+        error_message = f"诊断失败：{str(e)}"
+        # 检查异常消息中是否包含权限错误
+        if is_permission_error(error_message):
+            error_message = enhance_permission_error_message(error_message)
         return DiagnosisMCPResponse(
             code=DiagnoseResultCode.TASK_CREATE_FAILED,
-            message=f"诊断失败：{str(e)}",
+            message=error_message,
             task_id=""
         )
 
@@ -112,7 +129,12 @@ async def iodiagnose(
     timeout: Optional[str] = Field(None, description="诊断时长"),
     ctx: Context | None = None,
 ) -> DiagnosisMCPResponse:
-    """iodiagnose（IO一键诊断）工具专注于高频出现的IO高延迟、IO Burst及IO Wait等问题，支持对各种IO问题类型的识别，并调用相应的子工具对IO数据进行分析，从而提供结论和建议。
+    """重要提示：
+        在调用此工具之前，必须先调用 check_sysom_initialed 工具检查用户是否已开通sysom服务。
+        如果用户未开通sysom服务，必须先调用 initial_sysom 工具开通服务，或引导用户前往 https://alinux.console.aliyun.com 进行开通。
+        只有在确认用户已开通sysom服务后，才能调用此工具。
+    
+    iodiagnose（IO一键诊断）工具专注于高频出现的IO高延迟、IO Burst及IO Wait等问题，支持对各种IO问题类型的识别，并调用相应的子工具对IO数据进行分析，从而提供结论和建议。
     使用场景：
         1. IO延迟较高，需要排查主要的延迟点是位于操作系统（OS）层面，还是后端服务。
         2. 存在IO异常流量，需识别发起该流量的进程。
@@ -157,12 +179,22 @@ async def iodiagnose(
             region=region,
             params=params
         )
-        return await helper.execute(mcp_request)
+        response = await helper.execute(mcp_request)
+        
+        # 检查是否是权限错误，如果是则增强错误消息
+        if response.code != DiagnoseResultCode.SUCCESS and is_permission_error(response.message or ""):
+            response.message = enhance_permission_error_message(response.message or "")
+        
+        return response
     except Exception as e:
         logger.error(f"iodiagnose诊断失败: {e}")
+        error_message = f"诊断失败：{str(e)}"
+        # 检查异常消息中是否包含权限错误
+        if is_permission_error(error_message):
+            error_message = enhance_permission_error_message(error_message)
         return DiagnosisMCPResponse(
             code=DiagnoseResultCode.TASK_CREATE_FAILED,
-            message=f"诊断失败：{str(e)}",
+            message=error_message,
             task_id=""
         )
 

@@ -128,8 +128,6 @@ uv run python sysom_main_mcp.py --stdio
 uv run python sysom_main_mcp.py --sse --host 0.0.0.0 --port 7140
 ```
 
-更多使用说明请参考 [SYSOM_MAIN_MCP_README.md](./SYSOM_MAIN_MCP_README.md)。
-
 
 ## 功能模块
 
@@ -182,7 +180,6 @@ sysom_mcp/
 ├── uv.lock                # uv 依赖锁定文件
 ├── requirements.txt       # Python 依赖（兼容性）
 ├── sysom_main_mcp.py     # 统一 MCP 服务器入口
-├── main.py                # 主入口文件
 └── src/                   # 源代码目录
     └── tools/             # MCP 工具模块
         ├── am_mcp.py          # 应用管理工具
