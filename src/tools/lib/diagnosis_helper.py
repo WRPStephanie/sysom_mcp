@@ -86,8 +86,8 @@ class DiagnosisMCPHelper(MCPHelper):
         # 1. 准备参数并发起诊断
         # 确保 params 包含 source 字段，没有则添加 source=mcp
         params = dict(request.params)
-        if "source" not in params:
-            params["source"] = "mcp"
+        if "__sysom_diagnosis_source" not in params:
+            params["__sysom_diagnosis_source"] = "mcp"
         params_json = json.dumps(params, ensure_ascii=False)
         
         api_name = "invoke_diagnosis"
